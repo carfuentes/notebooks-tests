@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 import scipy.signal
@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-# In[17]:
+# In[89]:
 
 
 #Parámetros
@@ -35,7 +35,7 @@ t=np.arange(trainLen+testLen+1)
 print(t)
 
 
-# In[18]:
+# In[90]:
 
 
 def dx_y_z(x_y_z,t,a,b,c):
@@ -46,28 +46,36 @@ def dx_y_z(x_y_z,t,a,b,c):
     return np.array([dx_dt,dy_dt,dz_dt])
 
 
-# In[19]:
+# In[91]:
 
 
 x_y_z=scipy.integrate.odeint(dx_y_z,x0_y0_z0, t,args=(a,b,c))
 x=x_y_z[:,0]
 
 
-# In[20]:
+# In[92]:
 
 
-plt.plot(t,x)
+plt.plot(t,x+20)
 plt.show()
 
 
-# In[18]:
+# In[80]:
+
+
+x_20=x+20
+np.any(x_20<0)
+x_20[x_20<0]
+
+
+# In[93]:
 
 
 plt.plot(x_y_z[:,0], x_y_z[:,1])
 plt.show()
 
 
-# In[8]:
+# In[94]:
 
 
 fig = plt.figure()
@@ -79,7 +87,7 @@ ax.set_zlabel('z')
 plt.show()
 
 
-# In[27]:
+# In[95]:
 
 
 def autocorr(x):
@@ -88,19 +96,36 @@ def autocorr(x):
     return result/result[0]
 
 
-# In[33]:
+# In[99]:
+
+
+def estimated_autocorrelation(x):
+    """
+    http://stackoverflow.com/q/14297012/190597
+    http://en.wikipedia.org/wiki/Autocorrelation#Estimation
+    """
+    n = len(x)
+    variance = x.var()
+    x = x-x.mean()
+    r = np.correlate(x, x, mode = 'full')[-n:]
+    assert np.allclose(r, np.array([(x[:n-k]*x[-(n-k):]).sum() for k in range(n)]))
+    result = r/(variance*(np.arange(n, 0, -1)))
+    return result
+
+
+# In[96]:
 
 
 autocorr_x= scipy.signal.correlate(x_y_z[:,0], x_y_z[:,0], mode='full')
 
 
-# In[34]:
+# In[100]:
 
 
-autocorr_x= autocorr(x_y_z[:,0])
+autocorr_x= estimated_autocorrelation(x_y_z[:,0])
 
 
-# In[35]:
+# In[101]:
 
 
 plt.plot(t,autocorr_x)
