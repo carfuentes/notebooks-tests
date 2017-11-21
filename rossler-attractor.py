@@ -10,13 +10,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-# In[89]:
+# In[2]:
 
 
 #Parámetros
-a=0.25
-b=0.20
-c=5.7
+a=0.1
+b=0.1
+c=14
 
 #INITIAL CONDITION
 x0=1.0
@@ -35,7 +35,7 @@ t=np.arange(trainLen+testLen+1)
 print(t)
 
 
-# In[90]:
+# In[3]:
 
 
 def dx_y_z(x_y_z,t,a,b,c):
@@ -46,21 +46,24 @@ def dx_y_z(x_y_z,t,a,b,c):
     return np.array([dx_dt,dy_dt,dz_dt])
 
 
-# In[91]:
+# In[4]:
 
 
 x_y_z=scipy.integrate.odeint(dx_y_z,x0_y0_z0, t,args=(a,b,c))
 x=x_y_z[:,0]
 
 
-# In[92]:
+# In[13]:
 
 
-plt.plot(t,x+20)
+x_20=x+20
+plt.plot(t[0:200],x_20[0:200])
+plt.show()
+plt.plot(t[0:200],x[0:200])
 plt.show()
 
 
-# In[80]:
+# In[12]:
 
 
 x_20=x+20
