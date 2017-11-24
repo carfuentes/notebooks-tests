@@ -9,8 +9,8 @@ __pycache__/
 #txt files
 *.txt
 
-#notebooks
-*.ipynb
+#notebooks no for the moment
+#*.ipynb
 
 #Datasets
 Dataset*/
