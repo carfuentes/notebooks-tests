@@ -1,30 +1,25 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[59]:
 
 
 import numpy as np
-from matplotlib import * 
+from matplotlib.pyplot import * 
 from math import sqrt
+import numba
 
 
-# In[ ]:
+# In[60]:
 
 
-t= np.linspace(0,6,100)
-D=1
-lamda=1
-
-
-# In[3]:
-
-
-def colored_noise_euler_integration(x_0, lamda, D, n, dt=0.001, t_stop=6):
+@numba.jit(nopython=True)
+def colored_noise_euler_integration(x_0, tau, c, dt=0.01, t_stop=60):
     """
     Use Euler integration to solve ODEs
     """    
-    E=np.exp(-lamda * dt)
+    mu=np.exp(-dt/tau)
+    sigma= sqrt( ((c * tau)/2) * (1-mu**2) )
     
     # Time points
     t = np.linspace(0, t_stop, int(t_stop/dt))
@@ -32,29 +27,95 @@ def colored_noise_euler_integration(x_0, lamda, D, n, dt=0.001, t_stop=6):
     # Initialize output array
     x = x_0 * np.ones_like(t)
     
-    # Do Euler stepping
-    for i in range(i_time, len(t) - 1):
-        h= sqrt( D * lamda * (1-E**2) ) * np.random.normal()
-        x[i+1] = x[i] + dt * dx_dt(x[i - i_time], x[i], beta, tau, n)
+    for i in range(0, len(t) - 1):
+        x[i+1] = x[i]* mu + sigma * np.random.normal()
         
     return t, x
 
 
-# In[ ]:
+# In[61]:
 
 
-def de_dt (e0,t, lamda,D):
-    
+# Specify parameters
+x_0 = 0
+tau = 1
+c=1
+
+# Perform the solution
+t, x = colored_noise_euler_integration(x_0, tau, c, dt=0.001, t_stop=10000)
+
+# Plot the result
+figure(num=None, figsize=(10, 8), dpi=80, facecolor='w', edgecolor='k')
+plot(t[:6000], x[:6000])
+xlabel('time')
+ylabel('x')
+show()
+figure(num=None, figsize=(10, 8), dpi=80, facecolor='w', edgecolor='k')
+scatter(t[:6000], x[:6000])
+show()
 
 
-# In[4]:
+# In[51]:
 
 
-np.random.normal()
+t[600]
 
 
-# In[5]:
+# In[55]:
 
 
-np.exp(1*0.001)
+sqrt(4)
+
+
+# In[73]:
+
+
+t
+
+
+# In[91]:
+
+
+int(10/0.001)
+t[int(4/0.001)]
+
+
+# In[87]:
+
+
+np.where(t==1.00000000e+04)
+
+
+# In[102]:
+
+
+x=np.zeros((10,16))
+
+x[0,:]=np.random.rand(16)
+print(x)
+
+
+# In[104]:
+
+
+for i in range(0,10-1):
+    x[i+1,:]=np.random.rand(16)
+
+
+# In[105]:
+
+
+x
+
+
+# In[112]:
+
+
+np.array([2,2,2])**2
+
+
+# In[111]:
+
+
+len(t[indexes])
 
