@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[59]:
+# In[2]:
 
 
 import numpy as np
@@ -10,7 +10,7 @@ from math import sqrt
 import numba
 
 
-# In[60]:
+# In[3]:
 
 
 @numba.jit(nopython=True)
@@ -33,17 +33,18 @@ def colored_noise_euler_integration(x_0, tau, c, dt=0.01, t_stop=60):
     return t, x
 
 
-# In[61]:
+# In[5]:
 
 
 # Specify parameters
 x_0 = 0
 tau = 1
 c=1
-
+dt=0.001
+t_stop=10000
 # Perform the solution
-t, x = colored_noise_euler_integration(x_0, tau, c, dt=0.001, t_stop=10000)
-
+t, x = colored_noise_euler_integration(x_0, tau, c, dt, t_stop)
+indexes=[int(t/dt) for t in range(0,t_stop)]
 # Plot the result
 figure(num=None, figsize=(10, 8), dpi=80, facecolor='w', edgecolor='k')
 plot(t[:6000], x[:6000])
@@ -51,14 +52,15 @@ xlabel('time')
 ylabel('x')
 show()
 figure(num=None, figsize=(10, 8), dpi=80, facecolor='w', edgecolor='k')
-scatter(t[:6000], x[:6000])
+plot(t[indexes], x[indexes])
 show()
 
 
-# In[51]:
+# In[8]:
 
 
-t[600]
+len(t[indexes])
+t[indexes]
 
 
 # In[55]:
