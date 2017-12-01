@@ -1,20 +1,22 @@
 
 # coding: utf-8
 
-# In[2]:
+# In[38]:
 
 
 import numpy as np
 from matplotlib.pyplot import * 
 from math import sqrt
 import numba
+import scipy.signal
+from statsmodels.graphics.tsaplots import plot_acf
 
 
-# In[3]:
+# In[64]:
 
 
 @numba.jit(nopython=True)
-def colored_noise_euler_integration(x_0, tau, c, dt=0.01, t_stop=60):
+def colored_noise_euler_integration(x_0, tau, c, D, dt=0.001, t_stop=101):
     """
     Use Euler integration to solve ODEs
     """    
@@ -33,91 +35,98 @@ def colored_noise_euler_integration(x_0, tau, c, dt=0.01, t_stop=60):
     return t, x
 
 
-# In[5]:
+# In[65]:
+
+
+def estimated_autocorrelation(x):
+    """
+    http://stackoverflow.com/q/14297012/190597
+    http://en.wikipedia.org/wiki/Autocorrelation#Estimation
+    """
+    n = len(x)
+    variance = x.var()
+    x = x-x.mean()
+    r = np.correlate(x, x, mode = 'full')[-n:]
+    assert np.allclose(r, np.array([(x[:n-k]*x[-(n-k):]).sum() for k in range(n)]))
+    result = r/(variance*(np.arange(n, 0, -1)))
+    return result
+
+
+# In[94]:
 
 
 # Specify parameters
 x_0 = 0
-tau = 1
+tau = 10
 c=1
-dt=0.001
-t_stop=10000
+dt=10e-6
+D=0.08
+t_stop=100
 # Perform the solution
-t, x = colored_noise_euler_integration(x_0, tau, c, dt, t_stop)
+t, x = colored_noise_euler_integration(x_0, tau, c, D, dt, t_stop)
 indexes=[int(t/dt) for t in range(0,t_stop)]
 # Plot the result
 figure(num=None, figsize=(10, 8), dpi=80, facecolor='w', edgecolor='k')
-plot(t[:6000], x[:6000])
+plot(t, x)
 xlabel('time')
 ylabel('x')
 show()
-figure(num=None, figsize=(10, 8), dpi=80, facecolor='w', edgecolor='k')
-plot(t[indexes], x[indexes])
+
+
+# In[27]:
+
+
+def autocorrelation(x):
+    result = scipy.signal.correlate(x, x, mode='full')
+    result=result[result.size/2:]
+    return result/result[0]
+
+
+# In[25]:
+
+
+def autocorr_function(f):
+    temp = np.correlate(f, f, mode='full')
+    mid =temp.size/2
+    print(mid)
+    return temp[int(mid):]
+
+
+# In[30]:
+
+
+x_autocorr=[]
+for tau in range(1,5):
+    t, x = colored_noise_euler_integration(x_0, tau, c, dt, t_stop)
+    x_autocorr.append(x)
+
+
+# In[32]:
+
+
+autocorr_x=[]
+for x in x_autocorr:
+    autocorr_x.append(estimated_autocorrelation(x))
+
+
+# In[33]:
+
+
+plot(range(1,5),autocorr_x)
 show()
 
 
-# In[8]:
+# In[89]:
 
 
-len(t[indexes])
-t[indexes]
+autocorr=autocorr_function(x)
+plot(t,autocorr)
+show()
 
 
-# In[55]:
+# In[90]:
 
 
-sqrt(4)
-
-
-# In[73]:
-
-
-t
-
-
-# In[91]:
-
-
-int(10/0.001)
-t[int(4/0.001)]
-
-
-# In[87]:
-
-
-np.where(t==1.00000000e+04)
-
-
-# In[102]:
-
-
-x=np.zeros((10,16))
-
-x[0,:]=np.random.rand(16)
-print(x)
-
-
-# In[104]:
-
-
-for i in range(0,10-1):
-    x[i+1,:]=np.random.rand(16)
-
-
-# In[105]:
-
-
-x
-
-
-# In[112]:
-
-
-np.array([2,2,2])**2
-
-
-# In[111]:
-
-
-len(t[indexes])
+plot_acf(x)
+show()
 
