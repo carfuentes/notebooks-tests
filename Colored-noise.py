@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[38]:
+# In[2]:
 
 
 import numpy as np
@@ -33,6 +33,12 @@ def colored_noise_euler_integration(x_0, tau, c, D, dt=0.001, t_stop=101):
         x[i+1] = x[i]* mu + sigma * np.random.normal()
         
     return t, x
+
+
+# In[4]:
+
+
+np.random.rand(16)[1,:]
 
 
 # In[65]:
@@ -116,7 +122,7 @@ plot(range(1,5),autocorr_x)
 show()
 
 
-# In[89]:
+# In[ ]:
 
 
 autocorr=autocorr_function(x)
