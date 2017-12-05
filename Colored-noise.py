@@ -1,18 +1,18 @@
 
 # coding: utf-8
 
-# In[2]:
+# In[76]:
 
 
 import numpy as np
 from matplotlib.pyplot import * 
-from math import sqrt
+from math import sqrt, pi,cos
 import numba
 import scipy.signal
 from statsmodels.graphics.tsaplots import plot_acf
 
 
-# In[64]:
+# In[2]:
 
 
 @numba.jit(nopython=True)
@@ -35,42 +35,55 @@ def colored_noise_euler_integration(x_0, tau, c, D, dt=0.001, t_stop=101):
     return t, x
 
 
-# In[4]:
+# In[80]:
 
 
-np.random.rand(16)[1,:]
-
-
-# In[65]:
-
-
-def estimated_autocorrelation(x):
+#@numba.jit(nopython=True)
+def colored_noise_euler_integration_fox(x_0, lamda, D, dt=0.001, t_stop=101):
     """
-    http://stackoverflow.com/q/14297012/190597
-    http://en.wikipedia.org/wiki/Autocorrelation#Estimation
-    """
-    n = len(x)
-    variance = x.var()
-    x = x-x.mean()
-    r = np.correlate(x, x, mode = 'full')[-n:]
-    assert np.allclose(r, np.array([(x[:n-k]*x[-(n-k):]).sum() for k in range(n)]))
-    result = r/(variance*(np.arange(n, 0, -1)))
-    return result
+    Use Euler integration to solve ODEs
+    """    
+    E=np.exp(-lamda * dt)
+    
+    # Time points
+    t = np.linspace(0, t_stop, int(t_stop/dt))
+    
+    # Initialize output array
+    x = x_0 * np.ones_like(t)
+    
+    for i in range(0, len(t) - 1):
+        a=np.random.uniform()
+        b=np.random.uniform()
+        x[i+1] = x[i]* E + sqrt(-2*D*lamda*(1-E**2)*np.log(a))*cos(2*pi*b)
+        
+    return t, x
 
 
-# In[94]:
+# In[114]:
 
 
 # Specify parameters
-x_0 = 0
-tau = 10
+x_0 = 1
+tau = 100
 c=1
-dt=10e-6
-D=0.08
+dt=0.001
+D=100
+lamda=0.00001
 t_stop=100
+
+
+# In[ ]:
+
+
+##GILLESPIE
+
+
+# In[117]:
+
+
 # Perform the solution
 t, x = colored_noise_euler_integration(x_0, tau, c, D, dt, t_stop)
-indexes=[int(t/dt) for t in range(0,t_stop)]
+
 # Plot the result
 figure(num=None, figsize=(10, 8), dpi=80, facecolor='w', edgecolor='k')
 plot(t, x)
@@ -79,60 +92,85 @@ ylabel('x')
 show()
 
 
-# In[27]:
+# In[ ]:
 
 
-def autocorrelation(x):
-    result = scipy.signal.correlate(x, x, mode='full')
-    result=result[result.size/2:]
-    return result/result[0]
+##FOX
 
 
-# In[25]:
+# In[116]:
 
 
-def autocorr_function(f):
-    temp = np.correlate(f, f, mode='full')
-    mid =temp.size/2
-    print(mid)
-    return temp[int(mid):]
+# Perform the solution
+t, x = colored_noise_euler_integration_fox(x_0, lamda,D, dt, t_stop)
 
-
-# In[30]:
-
-
-x_autocorr=[]
-for tau in range(1,5):
-    t, x = colored_noise_euler_integration(x_0, tau, c, dt, t_stop)
-    x_autocorr.append(x)
-
-
-# In[32]:
-
-
-autocorr_x=[]
-for x in x_autocorr:
-    autocorr_x.append(estimated_autocorrelation(x))
-
-
-# In[33]:
-
-
-plot(range(1,5),autocorr_x)
+# Plot the result
+figure(num=None, figsize=(10, 8), dpi=80, facecolor='w', edgecolor='k')
+plot(t, x)
+xlabel('time')
+ylabel('x')
 show()
 
 
 # In[ ]:
 
 
+## AUTOCORRELATION
+
+
+# In[107]:
+
+
+def autocorrelation(x):
+    result = scipy.signal.correlate(x, x, mode='full')
+    result=result[int(result.size/2):]
+    return result/result[0]
+
+
+# In[39]:
+
+
+def autocorr_function(f):
+    temp = np.correlate(f, f, mode='full')
+    mid =temp.size/2
+    return temp[int(mid):]/temp[int(mid):]
+
+
+# In[118]:
+
+
+#1
+autocorr=autocorrelation(x)
+plot(t,autocorr)
+show()
+
+
+# In[ ]:
+
+
+#2
 autocorr=autocorr_function(x)
 plot(t,autocorr)
 show()
 
 
-# In[90]:
+# In[119]:
 
 
+#3
 plot_acf(x)
 show()
+
+
+# In[11]:
+
+
+#4
+iact=[]
+timeseries = x
+mean = np.mean(timeseries)
+timeseries -= np.mean(timeseries)
+autocorr_f = np.correlate(timeseries, timeseries, mode='full')
+temp = autocorr_f[int(autocorr_f.size/2):]/autocorr_f[int(autocorr_f.size/2)]
+iact.append(sum(autocorr_f[int(autocorr_f.size/2):]/autocorr_f[int(autocorr_f.size/2)]))
 
