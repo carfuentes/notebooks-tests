@@ -1,12 +1,12 @@
 
 # coding: utf-8
 
-# In[76]:
+# In[185]:
 
 
 import numpy as np
 from matplotlib.pyplot import * 
-from math import sqrt, pi,cos
+from math import sqrt, pi,cos,log
 import numba
 import scipy.signal
 from statsmodels.graphics.tsaplots import plot_acf
@@ -35,7 +35,7 @@ def colored_noise_euler_integration(x_0, tau, c, D, dt=0.001, t_stop=101):
     return t, x
 
 
-# In[80]:
+# In[3]:
 
 
 #@numba.jit(nopython=True)
@@ -59,26 +59,32 @@ def colored_noise_euler_integration_fox(x_0, lamda, D, dt=0.001, t_stop=101):
     return t, x
 
 
-# In[114]:
+# In[196]:
 
 
 # Specify parameters
 x_0 = 1
-tau = 100
+tau =10
 c=1
 dt=0.001
-D=100
-lamda=0.00001
+D=10
+lamda=0.003
 t_stop=100
 
 
-# In[ ]:
+# In[173]:
 
 
 ##GILLESPIE
 
 
-# In[117]:
+# In[174]:
+
+
+print(np.exp(1))
+
+
+# In[197]:
 
 
 # Perform the solution
@@ -92,13 +98,13 @@ ylabel('x')
 show()
 
 
-# In[ ]:
+# In[176]:
 
 
 ##FOX
 
 
-# In[116]:
+# In[177]:
 
 
 # Perform the solution
@@ -118,43 +124,36 @@ show()
 ## AUTOCORRELATION
 
 
-# In[107]:
+# In[84]:
 
 
 def autocorrelation(x):
-    result = scipy.signal.correlate(x, x, mode='full')
+    result = np.correlate(x, x, mode='full')
     result=result[int(result.size/2):]
     return result/result[0]
 
 
-# In[39]:
-
-
-def autocorr_function(f):
-    temp = np.correlate(f, f, mode='full')
-    mid =temp.size/2
-    return temp[int(mid):]/temp[int(mid):]
-
-
-# In[118]:
+# In[198]:
 
 
 #1
 autocorr=autocorrelation(x)
-plot(t,autocorr)
+plot(autocorr)
 show()
 
 
-# In[ ]:
+# In[135]:
 
 
 #2
-autocorr=autocorr_function(x)
-plot(t,autocorr)
+y = x - np.mean(x)
+norm = np.sum(y ** 2)
+correlated = np.correlate(y, y, mode='full')/norm
+plot(correlated)
 show()
 
 
-# In[119]:
+# In[134]:
 
 
 #3
@@ -162,7 +161,7 @@ plot_acf(x)
 show()
 
 
-# In[11]:
+# In[44]:
 
 
 #4
